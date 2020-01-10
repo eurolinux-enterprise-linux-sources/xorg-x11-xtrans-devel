@@ -5,15 +5,16 @@
 
 Summary: X.Org X11 developmental X transport library
 Name: xorg-x11-xtrans-devel
-Version: 1.2.2
-Release: 4.1%{?dist}
+Version: 1.2.7
+Release: 2%{?dist}
 License: MIT
 Group: System Environment/Libraries
 URL: http://www.x.org
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 
 Source0: http://xorg.freedesktop.org/archive/individual/lib/xtrans-%{version}.tar.bz2
+
+# Fedora specific patch
 Patch1: xtrans-1.0.3-avoid-gethostname.patch
 
 BuildRequires: pkgconfig
@@ -29,20 +30,16 @@ X.Org X11 developmental X transport library
 %build
 
 # yes, this looks horrible, but it's to get the .pc file in datadir
-%configure --libdir=%{_datadir}
+%configure --libdir=%{_datadir} \
+	   --docdir=%{_docdir}/%{name}-%{version}-%{release}
 # Running 'make' not needed.
 
 %install
-rm -rf $RPM_BUILD_ROOT
-
-make install DESTDIR=$RPM_BUILD_ROOT
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING NEWS README
+%doc AUTHORS ChangeLog COPYING README
 %dir %{_includedir}/X11
 %dir %{_includedir}/X11/Xtrans
 %{_includedir}/X11/Xtrans/Xtrans.c
@@ -55,10 +52,27 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/X11/Xtrans/transport.c
 %{_datadir}/aclocal/xtrans.m4
 %{_datadir}/pkgconfig/xtrans.pc
+%dir %{_docdir}/%{name}-%{version}-%{release}
+%{_docdir}/%{name}-%{version}-%{release}/xtrans.xml
 
 %changelog
-* Mon Nov 30 2009 Dennis Gregorovic <dgregor@redhat.com> - 1.2.2-4.1
-- Rebuilt for RHEL 6
+* Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.2.7-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Mon Apr 09 2012 Adam Jackson <ajax@redhat.com> 1.2.7-1
+- xtrans 1.2.7 (#806309)
+
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.2.6-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.2.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Tue Nov 09 2010 Peter Hutterer <peter.hutterer@redhat.com> 1.2.6-1
+- xtrans 1.2.6
+
+* Sat Sep 25 2010 Parag Nemade <paragn AT fedoraproject.org> - 1.2.2-5
+- Merge-review cleanup (#226656)
 
 * Mon Aug 03 2009 Adam Jackson <ajax@redhat.com> 1.2.2-4
 - Un-Requires xorg-x11-filesystem
