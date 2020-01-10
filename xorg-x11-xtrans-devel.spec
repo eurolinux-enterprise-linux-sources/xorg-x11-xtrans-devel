@@ -1,3 +1,5 @@
+%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
+
 # NOTE: This package contains only C source and header files and pkg-config
 # *.pc files, and does not contain any ELF binaries or DSOs, so we disable
 # debuginfo generation.
@@ -5,8 +7,8 @@
 
 Summary: X.Org X11 developmental X transport library
 Name: xorg-x11-xtrans-devel
-Version: 1.2.7
-Release: 2%{?dist}
+Version: 1.3.4
+Release: 1%{?dist}
 License: MIT
 Group: System Environment/Libraries
 URL: http://www.x.org
@@ -28,18 +30,16 @@ X.Org X11 developmental X transport library
 %patch1 -p1 -b .my-name-is-unix
 
 %build
-
 # yes, this looks horrible, but it's to get the .pc file in datadir
-%configure --libdir=%{_datadir} \
-	   --docdir=%{_docdir}/%{name}-%{version}-%{release}
+%configure --libdir=%{_datadir} --docdir=%{_pkgdocdir}
 # Running 'make' not needed.
 
 %install
 make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
+install -pm 644 AUTHORS ChangeLog COPYING README $RPM_BUILD_ROOT%{_pkgdocdir}
 
 %files
-%defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING README
+%{_pkgdocdir}
 %dir %{_includedir}/X11
 %dir %{_includedir}/X11/Xtrans
 %{_includedir}/X11/Xtrans/Xtrans.c
@@ -47,15 +47,37 @@ make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
 %{_includedir}/X11/Xtrans/Xtransint.h
 %{_includedir}/X11/Xtrans/Xtranslcl.c
 %{_includedir}/X11/Xtrans/Xtranssock.c
-%{_includedir}/X11/Xtrans/Xtranstli.c
 %{_includedir}/X11/Xtrans/Xtransutil.c
 %{_includedir}/X11/Xtrans/transport.c
 %{_datadir}/aclocal/xtrans.m4
 %{_datadir}/pkgconfig/xtrans.pc
-%dir %{_docdir}/%{name}-%{version}-%{release}
-%{_docdir}/%{name}-%{version}-%{release}/xtrans.xml
 
 %changelog
+* Mon Mar 31 2014 Hans de Goede <hdegoede@redhat.com> - 1.3.4-1
+- xtrans 1.3.4
+
+* Tue Jan 28 2014 Hans de Goede <hdegoede@redhat.com> - 1.3.3-1
+- xtrans 1.3.3
+- drop unnecessary autoreconf call
+
+* Mon Dec  2 2013 Ville Skyttä <ville.skytta@iki.fi> - 1.3.2-2
+- Install docs to %%{_pkgdocdir} where available (#993878).
+
+* Mon Nov 18 2013 Dave Airlie <airlied@redhat.com> 1.3.2-1
+- xtrans 1.3.2
+
+* Wed Nov 06 2013 Adam Jackson <ajax@redhat.com> 1.3.0-1
+- xtrans 1.3.0
+
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.2.7-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Thu Mar 07 2013 Dave Airlie <airlied@redhat.com> 1.2.7-4
+- autoreconf for aarch64
+
+* Fri Feb 15 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.2.7-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
 * Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.2.7-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
