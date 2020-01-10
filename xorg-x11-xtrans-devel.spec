@@ -7,7 +7,7 @@
 
 Summary: X.Org X11 developmental X transport library
 Name: xorg-x11-xtrans-devel
-Version: 1.3.4
+Version: 1.3.5
 Release: 1%{?dist}
 License: MIT
 Group: System Environment/Libraries
@@ -53,6 +53,12 @@ install -pm 644 AUTHORS ChangeLog COPYING README $RPM_BUILD_ROOT%{_pkgdocdir}
 %{_datadir}/pkgconfig/xtrans.pc
 
 %changelog
+* Tue Sep 23 2014 Adam Jackson <ajax@redhat.com> 1.3.5-1
+- xtrans 1.3.5
+
+* Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Mon Mar 31 2014 Hans de Goede <hdegoede@redhat.com> - 1.3.4-1
 - xtrans 1.3.4
 
