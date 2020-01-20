@@ -1,3 +1,105 @@
+commit 0153d1670e4a1883e1bb6dd971435d6268eac5ba
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Nov 7 20:16:53 2013 -0800
+
+    xtrans 1.3.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 426049c30162ed620cc16bb58edef6aac4e2ee5d
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Nov 7 19:17:44 2013 -0800
+
+    Allow XTRANS_SEND_FDS on Solaris as well
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 76b4f4430f9a857a1b54bfde9ef57a95b87789f5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Nov 6 22:34:03 2013 -0800
+
+    Check if we need to define _XOPEN_SOURCE for struct msghdr.msg_control
+    
+    Required to expose the structure members in Solaris headers, since it
+    was an XPG4/UNIX95 addition to the Solaris ABI.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 32070a64ba99fb89ec039e26444b1e026d6a978e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Nov 6 21:52:21 2013 -0800
+
+    Add stubs for send/recv fd functions in local transports
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 08bf85958fab64951a9ba9e27dcb6b8eb818cc7e
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Nov 7 18:04:30 2013 -0800
+
+    Switch to CMSG_* macros for FD passing
+    
+    This should be portable to non-Linux systems
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6b54b5cf8086f127aa87096e2bdd2263d1c81683
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Nov 7 03:49:05 2013 -0800
+
+    Actually disable all of the FD passing code unless XTRANS_SEND_FDS is set
+    
+    Stick all of the functions relating to FD passing inside
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit f3709f3e0b883a0b4956313f89fa931e9264c346
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 6 23:16:11 2013 -0800
+
+    Update to version 1.3.1
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 074614940c570524e1446f55fc12a64415057e1f
+Author: Mark Kettenis <kettenis@openbsd.org>
+Date:   Wed Nov 6 23:13:28 2013 -0800
+
+    Don't include file descriptor passing code by default
+    
+    Leave it up to the consumer to request this functionality by defining
+    XTRANS_SEND_FDS.
+    
+    Signed-off-by: Mark Kettenis <kettenis@openbsd.org>
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    
+    v2 - make sure this is only defined on systems where the code actually
+    works (Linux for now)
+
+commit a7094c389ac9fd5ca265996f76eb55cb1133974b
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Nov 2 19:23:41 2013 -0700
+
+    Add SEND_FDS version of Readv
+    
+    Now that we've found that libFS uses readv, we can test whether this
+    readv implementation works correctly.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 58151f63553faf81babd1371770b7a7f33cecac1
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Nov 2 19:10:11 2013 -0700
+
+    Revert "Remove 'Readv' interface"
+    
+    This reverts commit 9e8d99c2e27f2c8acbbfb5b760649aa1bfad665e.
+    
+    libFS still uses this API...
+
 commit 1fb0fd555a16dd8fce4abc6d3fd22b315f46762a
 Author: Keith Packard <keithp@keithp.com>
 Date:   Thu Oct 31 17:21:53 2013 -0700
