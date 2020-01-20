@@ -445,6 +445,27 @@ TRANS(SocketOpen) (int i, int type)
     }
 #endif
 
+    /*
+     * Some systems provide a really small default buffer size for
+     * UNIX sockets.  Bump it up a bit such that large transfers don't
+     * proceed at glacial speed.
+     */
+#ifdef SO_SNDBUF
+    if (Sockettrans2devtab[i].family == AF_UNIX)
+    {
+	SOCKLEN_T len = sizeof (int);
+	int val;
+
+	if (getsockopt (ciptr->fd, SOL_SOCKET, SO_SNDBUF,
+	    (char *) &val, &len) == 0 && val < 64 * 1024)
+	{
+	    val = 64 * 1024;
+	    setsockopt (ciptr->fd, SOL_SOCKET, SO_SNDBUF,
+	        (char *) &val, sizeof (int));
+	}
+    }
+#endif
+
     return ciptr;
 }
 
@@ -452,7 +473,7 @@ TRANS(SocketOpen) (int i, int type)
 #ifdef TRANS_REOPEN
 
 static XtransConnInfo
-TRANS(SocketReopen) (int i _X_UNUSED, int type, int fd, char *port)
+TRANS(SocketReopen) (int i _X_UNUSED, int type, int fd, const char *port)
 
 {
     XtransConnInfo	ciptr;
@@ -575,8 +596,8 @@ TRANS(SocketOpenCOTSClientBase) (const char *transname, const char *protocol,
 }
 
 static XtransConnInfo
-TRANS(SocketOpenCOTSClient) (Xtransport *thistrans, char *protocol,
-			     char *host, char *port)
+TRANS(SocketOpenCOTSClient) (Xtransport *thistrans, const char *protocol,
+			     const char *host, const char *port)
 {
     return TRANS(SocketOpenCOTSClientBase)(
 			thistrans->TransName, protocol, host, port, -1);
@@ -589,8 +610,8 @@ TRANS(SocketOpenCOTSClient) (Xtransport *thistrans, char *protocol,
 #ifdef TRANS_SERVER
 
 static XtransConnInfo
-TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, char *protocol,
-			     char *host, char *port)
+TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, const char *protocol,
+			     const char *host, const char *port)
 
 {
     XtransConnInfo	ciptr;
@@ -656,8 +677,8 @@ TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, char *protocol,
 #ifdef TRANS_CLIENT
 
 static XtransConnInfo
-TRANS(SocketOpenCLTSClient) (Xtransport *thistrans, char *protocol,
-			     char *host, char *port)
+TRANS(SocketOpenCLTSClient) (Xtransport *thistrans, const char *protocol,
+			     const char *host, const char *port)
 
 {
     XtransConnInfo	ciptr;
@@ -695,8 +716,8 @@ TRANS(SocketOpenCLTSClient) (Xtransport *thistrans, char *protocol,
 #ifdef TRANS_SERVER
 
 static XtransConnInfo
-TRANS(SocketOpenCLTSServer) (Xtransport *thistrans, char *protocol,
-			     char *host, char *port)
+TRANS(SocketOpenCLTSServer) (Xtransport *thistrans, const char *protocol,
+			     const char *host, const char *port)
 
 {
     XtransConnInfo	ciptr;
@@ -741,7 +762,7 @@ TRANS(SocketOpenCLTSServer) (Xtransport *thistrans, char *protocol,
 #ifdef TRANS_REOPEN
 
 static XtransConnInfo
-TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, char *port)
+TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, const char *port)
 
 {
     XtransConnInfo	ciptr;
@@ -775,7 +796,7 @@ TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, char *port)
 }
 
 static XtransConnInfo
-TRANS(SocketReopenCLTSServer) (Xtransport *thistrans, int fd, char *port)
+TRANS(SocketReopenCLTSServer) (Xtransport *thistrans, int fd, const char *port)
 
 {
     XtransConnInfo	ciptr;
@@ -926,7 +947,8 @@ TRANS(SocketCreateListener) (XtransConnInfo ciptr,
 
 #ifdef TCPCONN
 static int
-TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, char *port, unsigned int flags)
+TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, const char *port,
+                                 unsigned int flags)
 
 {
 #if defined(IPv6) && defined(AF_INET6)
@@ -1054,7 +1076,7 @@ TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, char *port, unsigned int 
 #ifdef UNIXCONN
 
 static int
-TRANS(SocketUNIXCreateListener) (XtransConnInfo ciptr, char *port,
+TRANS(SocketUNIXCreateListener) (XtransConnInfo ciptr, const char *port,
 				 unsigned int flags)
 
 {
@@ -1410,7 +1432,8 @@ static struct addrlist  *addrlist = NULL;
 
 
 static int
-TRANS(SocketINETConnect) (XtransConnInfo ciptr, char *host, char *port)
+TRANS(SocketINETConnect) (XtransConnInfo ciptr,
+                          const char *host, const char *port)
 
 {
     struct sockaddr *	socketaddr = NULL;
@@ -1792,7 +1815,7 @@ TRANS(SocketINETConnect) (XtransConnInfo ciptr, char *host, char *port)
  */
 
 static int
-UnixHostReallyLocal (char *host)
+UnixHostReallyLocal (const char *host)
 
 {
     char hostnamebuf[256];
@@ -1923,7 +1946,8 @@ UnixHostReallyLocal (char *host)
 }
 
 static int
-TRANS(SocketUNIXConnect) (XtransConnInfo ciptr, char *host, char *port)
+TRANS(SocketUNIXConnect) (XtransConnInfo ciptr,
+                          const char *host, const char *port)
 
 {
     struct sockaddr_un	sockname;
@@ -2197,26 +2221,10 @@ TRANS(SocketSendFdInvalid)(XtransConnInfo ciptr, int fd, int do_close)
 
 #define MAX_FDS		128
 
-struct fd_pass {
+union fd_pass {
 	struct cmsghdr	cmsghdr;
-	int		fd[MAX_FDS];
+	char		buf[CMSG_SPACE(MAX_FDS * sizeof(int))];
 };
-
-static inline void init_msg_recv(struct msghdr *msg, struct iovec *iov, int niov, struct fd_pass *pass, int nfd) {
-    msg->msg_name = NULL;
-    msg->msg_namelen = 0;
-    msg->msg_iov = iov;
-    msg->msg_iovlen = niov;
-    msg->msg_control = pass;
-    msg->msg_controllen = sizeof (struct cmsghdr) + nfd * sizeof (int);
-}
-
-static inline void init_msg_send(struct msghdr *msg, struct iovec *iov, int niov, struct fd_pass *pass, int nfd) {
-    init_msg_recv(msg, iov, niov, pass, nfd);
-    pass->cmsghdr.cmsg_len = msg->msg_controllen;
-    pass->cmsghdr.cmsg_level = SOL_SOCKET;
-    pass->cmsghdr.cmsg_type = SCM_RIGHTS;
-}
 
 #endif /* XTRANS_SEND_FDS */
 
@@ -2241,13 +2249,13 @@ TRANS(SocketRead) (XtransConnInfo ciptr, char *buf, int size)
             .iov_base = buf,
             .iov_len = size
         };
-        char            cmsgbuf[CMSG_SPACE(sizeof(int) * MAX_FDS)];
+        union fd_pass   cmsgbuf;
         struct msghdr   msg = {
             .msg_name = NULL,
             .msg_namelen = 0,
             .msg_iov = &iov,
             .msg_iovlen = 1,
-            .msg_control = cmsgbuf,
+            .msg_control = cmsgbuf.buf,
             .msg_controllen = CMSG_LEN(MAX_FDS * sizeof(int))
         };
 
@@ -2282,13 +2290,13 @@ TRANS(SocketReadv) (XtransConnInfo ciptr, struct iovec *buf, int size)
 
 #if XTRANS_SEND_FDS
     {
-        char            cmsgbuf[CMSG_SPACE(sizeof(int) * MAX_FDS)];
+        union fd_pass   cmsgbuf;
         struct msghdr   msg = {
             .msg_name = NULL,
             .msg_namelen = 0,
             .msg_iov = buf,
             .msg_iovlen = size,
-            .msg_control = cmsgbuf,
+            .msg_control = cmsgbuf.buf,
             .msg_controllen = CMSG_LEN(MAX_FDS * sizeof(int))
         };
 
@@ -2324,7 +2332,7 @@ TRANS(SocketWritev) (XtransConnInfo ciptr, struct iovec *buf, int size)
 #if XTRANS_SEND_FDS
     if (ciptr->send_fds)
     {
-        char                    cmsgbuf[CMSG_SPACE(sizeof(int) * MAX_FDS)];
+        union fd_pass           cmsgbuf;
         int                     nfd = nFd(&ciptr->send_fds);
         struct _XtransConnFd    *cf = ciptr->send_fds;
         struct msghdr           msg = {
@@ -2332,7 +2340,7 @@ TRANS(SocketWritev) (XtransConnInfo ciptr, struct iovec *buf, int size)
             .msg_namelen = 0,
             .msg_iov = buf,
             .msg_iovlen = size,
-            .msg_control = cmsgbuf,
+            .msg_control = cmsgbuf.buf,
             .msg_controllen = CMSG_LEN(nfd * sizeof(int))
         };
         struct cmsghdr          *hdr = CMSG_FIRSTHDR(&msg);

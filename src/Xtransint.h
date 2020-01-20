@@ -72,10 +72,6 @@ from The Open Group.
 #  define XTRANSDEBUG 1
 #endif
 
-#if XTRANS_SEND_FDS && !(defined(linux) || defined(__sun))
-#error "FD passing support only on Linux & Solaris"
-#endif
-
 #ifdef WIN32
 # define _WILLWINSOCK_
 #endif
@@ -167,9 +163,9 @@ typedef struct _Xtransport {
 
     XtransConnInfo (*OpenCOTSClient)(
 	struct _Xtransport *,	/* transport */
-	char *,			/* protocol */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* protocol */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_CLIENT */
@@ -178,9 +174,9 @@ typedef struct _Xtransport {
     const char **	nolisten;
     XtransConnInfo (*OpenCOTSServer)(
 	struct _Xtransport *,	/* transport */
-	char *,			/* protocol */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* protocol */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_SERVER */
@@ -189,9 +185,9 @@ typedef struct _Xtransport {
 
     XtransConnInfo (*OpenCLTSClient)(
 	struct _Xtransport *,	/* transport */
-	char *,			/* protocol */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* protocol */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_CLIENT */
@@ -200,9 +196,9 @@ typedef struct _Xtransport {
 
     XtransConnInfo (*OpenCLTSServer)(
 	struct _Xtransport *,	/* transport */
-	char *,			/* protocol */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* protocol */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_SERVER */
@@ -213,13 +209,13 @@ typedef struct _Xtransport {
     XtransConnInfo (*ReopenCOTSServer)(
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
-        char *			/* port */
+        const char *		/* port */
     );
 
     XtransConnInfo (*ReopenCLTSServer)(
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
-        char *			/* port */
+        const char *		/* port */
     );
 
 #endif /* TRANS_REOPEN */
@@ -237,7 +233,7 @@ typedef struct _Xtransport {
 
     int	(*CreateListener)(
 	XtransConnInfo,		/* connection */
-	char *,			/* port */
+	const char *,		/* port */
 	unsigned int		/* flags */
     );
 
@@ -256,8 +252,8 @@ typedef struct _Xtransport {
 
     int	(*Connect)(
 	XtransConnInfo,		/* connection */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_CLIENT */
@@ -335,6 +331,7 @@ typedef struct _Xtransport_table {
 #define TRANS_NOUNLINK	(1<<4)	/* Don't unlink transport endpoints */
 #define TRANS_ABSTRACT	(1<<5)	/* Use abstract sockets if available */
 #define TRANS_NOXAUTH	(1<<6)	/* Don't verify authentication (because it's secure some other way at the OS layer) */
+#define TRANS_RECEIVED	(1<<7)  /* The fd for this has already been opened by someone else. */
 
 /* Flags to preserve when setting others */
 #define TRANS_KEEPFLAGS	(TRANS_NOUNLINK|TRANS_ABSTRACT)

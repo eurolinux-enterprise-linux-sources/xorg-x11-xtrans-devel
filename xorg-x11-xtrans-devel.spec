@@ -7,8 +7,8 @@
 
 Summary: X.Org X11 developmental X transport library
 Name: xorg-x11-xtrans-devel
-Version: 1.3.2
-Release: 2%{?dist}
+Version: 1.3.5
+Release: 1%{?dist}
 License: MIT
 Group: System Environment/Libraries
 URL: http://www.x.org
@@ -21,7 +21,6 @@ Patch1: xtrans-1.0.3-avoid-gethostname.patch
 
 BuildRequires: pkgconfig
 BuildRequires: xorg-x11-util-macros
-BuildRequires: autoconf automake libtool
 
 %description
 X.Org X11 developmental X transport library
@@ -31,7 +30,6 @@ X.Org X11 developmental X transport library
 %patch1 -p1 -b .my-name-is-unix
 
 %build
-autoreconf -vif
 # yes, this looks horrible, but it's to get the .pc file in datadir
 %configure --libdir=%{_datadir} --docdir=%{_pkgdocdir}
 # Running 'make' not needed.
@@ -41,7 +39,6 @@ make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
 install -pm 644 AUTHORS ChangeLog COPYING README $RPM_BUILD_ROOT%{_pkgdocdir}
 
 %files
-%defattr(-,root,root,-)
 %{_pkgdocdir}
 %dir %{_includedir}/X11
 %dir %{_includedir}/X11/Xtrans
@@ -56,6 +53,19 @@ install -pm 644 AUTHORS ChangeLog COPYING README $RPM_BUILD_ROOT%{_pkgdocdir}
 %{_datadir}/pkgconfig/xtrans.pc
 
 %changelog
+* Tue Sep 23 2014 Adam Jackson <ajax@redhat.com> 1.3.5-1
+- xtrans 1.3.5
+
+* Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Mon Mar 31 2014 Hans de Goede <hdegoede@redhat.com> - 1.3.4-1
+- xtrans 1.3.4
+
+* Tue Jan 28 2014 Hans de Goede <hdegoede@redhat.com> - 1.3.3-1
+- xtrans 1.3.3
+- drop unnecessary autoreconf call
+
 * Mon Dec  2 2013 Ville Skyttä <ville.skytta@iki.fi> - 1.3.2-2
 - Install docs to %%{_pkgdocdir} where available (#993878).
 
